@@ -181,7 +181,7 @@ class CrossKDFasterRCNN(TwoStageDetector):
             stu_x, tea_x, rpn_results_list,batch_data_samples)
         losses.update(roi_losses)
         
-        with self.with_feat_distill:
+        if self.with_feat_distill:
             losses_feat_kd = [
                 self.loss_feat_kd(feat, tea_feat)
                 for feat, tea_feat in zip(stu_x, tea_x)
