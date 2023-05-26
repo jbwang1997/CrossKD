@@ -59,6 +59,7 @@ from .crosskd_single_stage import CrossKDSingleStageDetector
 from .crosskd_retinanet import CrossKDRetinaNet
 from .crosskd_gfl import CrossKDGFL
 from .crosskd_faster_rcnn import CrossKDFasterRCNN
+from .crosskd_deformable_detr import CrossKDDeformableDETR
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',

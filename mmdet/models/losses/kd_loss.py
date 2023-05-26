@@ -53,8 +53,9 @@ def kd_quality_focal_loss(pred,
 
     target = target.detach().sigmoid()
     loss = F.binary_cross_entropy_with_logits(pred, target, reduction='none')
-    focal_weight = torch.abs(pred.sigmoid() - target).pow(beta)
-    loss = loss * focal_weight
+    if beta != 0:
+        focal_weight = torch.abs(pred.sigmoid() - target).pow(beta)
+        loss = loss * focal_weight
     loss = weight_reduce_loss(loss, weight, reduction, avg_factor)
     return loss
 
