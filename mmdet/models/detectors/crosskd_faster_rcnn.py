@@ -234,9 +234,9 @@ class CrossKDFasterRCNN(TwoStageDetector):
         stu_head, tea_head = self.roi_head, self.teacher.roi_head
         stu_bbox_results = stu_head._bbox_forward(stu_x, rois)
         tea_bbox_results = tea_head._bbox_forward(tea_x, rois)
-        reused_x = [self.align_scale(s_x, t_x) for s_x, t_x 
-                    in zip(stu_x, tea_x)]
-        reused_bbox_results = tea_head._bbox_forward(reused_x, rois)
+        # reused_x = [self.align_scale(s_x, t_x) for s_x, t_x 
+        #             in zip(stu_x, tea_x)]
+        reused_bbox_results = tea_head._bbox_forward(stu_x, rois)
 
         bbox_loss_and_target = stu_head.bbox_head.loss_and_target(
             cls_score=stu_bbox_results['cls_score'],
@@ -258,25 +258,79 @@ class CrossKDFasterRCNN(TwoStageDetector):
         losses_kd['loss_cls_kd'] = loss_cls_kd
 
         # regression KD
+        # distill all box predictions
+        # assert stu_head.bbox_head.reg_class_agnostic \
+        #     == tea_head.bbox_head.reg_class_agnostic
+        # reused_bbox_preds = reused_bbox_results['bbox_pred'].reshape(-1, 4)
+        # tea_bbox_preds = tea_bbox_results['bbox_pred'].reshape(-1, 4)
+        # num_classes = stu_head.bbox_head.num_classes
+        # rois = rois[:, 1:]
+        # if stu_head.bbox_head.reg_class_agnostic:
+        #     reg_weights = tea_cls_scores.softmax(dim=1)[:, :num_classes].sum(dim=1)
+        # else:
+        #     rois = rois.repeat_interleave(num_classes, dim=0)
+        #     reg_weights = tea_cls_scores.softmax(dim=1)[:, :num_classes].reshape(-1)
+        # coder = stu_head.bbox_head.bbox_coder
+        # decoded_reused_bboxes = coder.decode(rois, reused_bbox_preds)
+        # decoded_tea_bboxes = coder.decode(rois, tea_bbox_preds)
+        # loss_reg_kd = self.loss_reg_kd(
+        #     decoded_reused_bboxes,
+        #     decoded_tea_bboxes,
+        #     weight=reg_weights,
+        #     avg_factor=reg_weights.sum())
+        # losses_kd['loss_reg_kd'] = loss_reg_kd
+
+
+        # distill max score box predictions
+        # assert stu_head.bbox_head.reg_class_agnostic \
+        #     == tea_head.bbox_head.reg_class_agnostic
+        # num_classes = stu_head.bbox_head.num_classes
+        # reused_bbox_preds = reused_bbox_results['bbox_pred']
+        # tea_bbox_preds = tea_bbox_results['bbox_pred']
+        # tea_cls_scores = tea_cls_scores.softmax(dim=1)[:, :num_classes]
+        # reg_weights, reg_distill_idx = tea_cls_scores.max(dim=1)
+        # if not stu_head.bbox_head.reg_class_agnostic:
+        #     reg_distill_idx = reg_distill_idx[:, None, None].repeat(1, 1, 4)
+        #     reused_bbox_preds = reused_bbox_preds.reshape(-1, num_classes, 4)
+        #     reused_bbox_preds = reused_bbox_preds.gather(dim=1, index=reg_distill_idx)
+        #     reused_bbox_preds = reused_bbox_preds.squeeze(1)
+        #     tea_bbox_preds = tea_bbox_preds.reshape(-1, num_classes, 4)
+        #     tea_bbox_preds = tea_bbox_preds.gather(dim=1, index=reg_distill_idx)
+        #     tea_bbox_preds = tea_bbox_preds.squeeze(1)
+
+        # rois = rois[:, 1:]
+        # coder = stu_head.bbox_head.bbox_coder
+        # decoded_reused_bboxes = coder.decode(rois, reused_bbox_preds)
+        # decoded_tea_bboxes = coder.decode(rois, tea_bbox_preds)
+        # loss_reg_kd = self.loss_reg_kd(
+        #     decoded_reused_bboxes,
+        #     decoded_tea_bboxes,
+        #     weight=reg_weights,
+        #     avg_factor=reg_weights.sum())
+        # losses_kd['loss_reg_kd'] = loss_reg_kd
+
+        # l1 loss
         assert stu_head.bbox_head.reg_class_agnostic \
             == tea_head.bbox_head.reg_class_agnostic
-        reused_bbox_preds = reused_bbox_results['bbox_pred'].reshape(-1, 4)
-        tea_bbox_preds = tea_bbox_results['bbox_pred'].reshape(-1, 4)
         num_classes = stu_head.bbox_head.num_classes
-        rois = rois[:, 1:]
-        if stu_head.bbox_head.reg_class_agnostic:
-            reg_weights = tea_cls_scores[:, :num_classes].sum(dim=1)
-        else:
-            rois = rois.repeat_interleave(num_classes, dim=0)
-            reg_weights = tea_cls_scores[:, :num_classes].reshape(-1)
-        coder = stu_head.bbox_head.bbox_coder
-        decoded_reused_bboxes = coder.decode(rois, reused_bbox_preds)
-        decoded_tea_bboxes = coder.decode(rois, tea_bbox_preds)
+        reused_bbox_preds = reused_bbox_results['bbox_pred']
+        tea_bbox_preds = tea_bbox_results['bbox_pred']
+        tea_cls_scores = tea_cls_scores.softmax(dim=1)[:, :num_classes]
+        reg_weights, reg_distill_idx = tea_cls_scores.max(dim=1)
+        if not stu_head.bbox_head.reg_class_agnostic:
+            reg_distill_idx = reg_distill_idx[:, None, None].repeat(1, 1, 4)
+            reused_bbox_preds = reused_bbox_preds.reshape(-1, num_classes, 4)
+            reused_bbox_preds = reused_bbox_preds.gather(dim=1, index=reg_distill_idx)
+            reused_bbox_preds = reused_bbox_preds.squeeze(1)
+            tea_bbox_preds = tea_bbox_preds.reshape(-1, num_classes, 4)
+            tea_bbox_preds = tea_bbox_preds.gather(dim=1, index=reg_distill_idx)
+            tea_bbox_preds = tea_bbox_preds.squeeze(1)
+
         loss_reg_kd = self.loss_reg_kd(
-            decoded_reused_bboxes,
-            decoded_tea_bboxes,
-            weight=reg_weights,
-            avg_factor=reg_weights.sum())
+            reused_bbox_preds,
+            tea_bbox_preds,
+            weight=reg_weights[:, None],
+            avg_factor=reg_weights.sum() * 4)
         losses_kd['loss_reg_kd'] = loss_reg_kd
 
         bbox_results = dict()

@@ -70,9 +70,10 @@ model = dict(
         loss_cls_kd=dict(
             type='KnowledgeDistillationKLDivLoss',
             class_reduction='sum',
-            T=1,
-            loss_weight=0.2),
-        loss_reg_kd=dict(type='GIoULoss', loss_weight=0.5)),
+            T=3,
+            loss_weight=0.5),
+        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0)),
+        # loss_reg_kd=dict(type='GIoULoss', loss_weight=3.0)),
     # model training and testing settings
     train_cfg=dict(
         rpn=dict(
