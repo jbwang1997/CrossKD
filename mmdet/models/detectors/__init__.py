@@ -58,6 +58,7 @@ from .yolox import YOLOX
 from .crosskd_single_stage import CrossKDSingleStageDetector
 from .crosskd_retinanet import CrossKDRetinaNet
 from .crosskd_gfl import CrossKDGFL
+from .crosskd_faster_rcnn import CrossKDFasterRCNN
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
