@@ -16,6 +16,11 @@ from .crosskd_single_stage import CrossKDSingleStageDetector
 @MODELS.register_module()
 class CrossKDGFL(CrossKDSingleStageDetector):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        kd_cfg = kwargs['kd_cfg']
+        self.loss_bbox_kd = MODELS.build(kd_cfg['loss_bbox_kd'])
+
     def loss(self, batch_inputs: Tensor,
              batch_data_samples: SampleList) -> Union[dict, list]:
         """Calculate losses from a batch of inputs and data samples.
@@ -174,18 +179,24 @@ class CrossKDGFL(CrossKDSingleStageDetector):
         losses = dict(
             loss_cls=losses_cls, loss_bbox=losses_bbox, loss_dfl=losses_dfl)
 
-        losses_cls_kd, losses_reg_kd, kd_avg_factor = multi_apply(
-            self.pred_mimicking_loss_single,
-            tea_cls_scores,
-            tea_bbox_preds,
-            reused_cls_scores,
-            reused_bbox_preds,
-            label_weights_list,
-            avg_factor=avg_factor)
+        losses_cls_kd, losses_reg_kd, losses_bbox_kd, \
+            kd_avg_factor = multi_apply(
+                self.pred_mimicking_loss_single,
+                tea_cls_scores,
+                tea_bbox_preds,
+                reused_cls_scores,
+                reused_bbox_preds,
+                anchor_list, 
+                self.bbox_head.prior_generator.strides,
+                label_weights_list,
+                avg_factor=avg_factor)
         kd_avg_factor = sum(kd_avg_factor)
         losses_reg_kd = list(map(lambda x: x / kd_avg_factor, losses_reg_kd))
+        losses_bbox_kd = list(map(lambda x: x / kd_avg_factor, losses_bbox_kd))
         losses.update(
-            dict(loss_cls_kd=losses_cls_kd, loss_reg_kd=losses_reg_kd))
+            dict(loss_cls_kd=losses_cls_kd,
+                 loss_reg_kd=losses_reg_kd,
+                 loss_bbox_kd=losses_bbox_kd))
 
         if self.with_feat_distill:
             losses_feat_kd = [
@@ -196,8 +207,8 @@ class CrossKDGFL(CrossKDSingleStageDetector):
         return losses
 
     def pred_mimicking_loss_single(self, tea_cls_score, tea_bbox_pred,
-                                   reused_cls_score, reused_bbox_pred,
-                                   label_weights, avg_factor):
+                                   reused_cls_score, reused_bbox_pred, anchors,
+                                   stride, label_weights, avg_factor):
         # classification branch distillation
         tea_cls_score = tea_cls_score.permute(0, 2, 3, 1).reshape(
             -1, self.bbox_head.cls_out_channels)
@@ -212,16 +223,34 @@ class CrossKDGFL(CrossKDSingleStageDetector):
 
         # regression branch distillation
         reg_max = self.bbox_head.reg_max
-        tea_bbox_pred = tea_bbox_pred.permute(0, 2, 3,
-                                              1).reshape(-1, reg_max + 1)
-        reused_bbox_pred = reused_bbox_pred.permute(0, 2, 3, 1).reshape(
-            -1, reg_max + 1)
+        flatten_tea_bbox_pred = tea_bbox_pred.permute(
+            0, 2, 3, 1).reshape(-1, reg_max + 1)
+        flatten_reused_bbox_pred = reused_bbox_pred.permute(
+            0, 2, 3, 1).reshape(-1, reg_max + 1)
         reg_weights = tea_cls_score.max(dim=1)[0].sigmoid()
         reg_weights[label_weights == 0] = 0
         loss_reg_kd = self.loss_reg_kd(
-            reused_bbox_pred,
-            tea_bbox_pred,
+            flatten_reused_bbox_pred,
+            flatten_tea_bbox_pred,
             weight=reg_weights[:, None].expand(-1, 4).reshape(-1),
             avg_factor=4.0)
+        
+        # GIoU Loss
+        anchors = anchors.reshape(-1, 4)
+        anchor_centers = self.bbox_head.anchor_center(anchors) / stride[0]
+        flatten_tea_bbox_pred = tea_bbox_pred.permute(
+            0, 2, 3, 1).reshape(-1, 4 * (reg_max + 1))
+        flatten_reused_bbox_pred = reused_bbox_pred.permute(
+            0, 2, 3, 1).reshape(-1, 4 * (reg_max + 1))
+        integral, coder = self.bbox_head.integral, self.bbox_head.bbox_coder
+        tea_bbox_corners, reused_bbox_corners = \
+            integral(flatten_tea_bbox_pred), integral(flatten_reused_bbox_pred)
+        tea_decoded_bbox = coder.decode(anchor_centers, tea_bbox_corners)
+        reused_decoded_bbox = coder.decode(anchor_centers, reused_bbox_corners)
+        loss_bbox_kd = self.loss_bbox_kd(
+            reused_decoded_bbox,
+            tea_decoded_bbox,
+            weight=reg_weights,
+            avg_factor=1.0)
 
-        return loss_cls_kd, loss_reg_kd, reg_weights.sum()
+        return loss_cls_kd, loss_reg_kd, loss_bbox_kd, reg_weights.sum()

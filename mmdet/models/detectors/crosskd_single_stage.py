@@ -13,7 +13,7 @@ from mmdet.registry import MODELS
 from mmdet.structures import SampleList
 from mmdet.structures.bbox import cat_boxes
 from mmdet.utils import (ConfigType, InstanceList, OptConfigType,
-                         OptInstanceList, reduce_mean)
+                         OptInstanceList, OptMultiConfig, reduce_mean)
 from ..utils import images_to_levels, multi_apply, unpack_gt_instances
 from .single_stage import SingleStageDetector
 
@@ -54,6 +54,7 @@ class CrossKDSingleStageDetector(SingleStageDetector):
         train_cfg: OptConfigType = None,
         test_cfg: OptConfigType = None,
         data_preprocessor: OptConfigType = None,
+        init_cfg: OptMultiConfig = None
     ) -> None:
         super().__init__(
             backbone=backbone,
@@ -61,7 +62,8 @@ class CrossKDSingleStageDetector(SingleStageDetector):
             bbox_head=bbox_head,
             train_cfg=train_cfg,
             test_cfg=test_cfg,
-            data_preprocessor=data_preprocessor)
+            data_preprocessor=data_preprocessor,
+            init_cfg=init_cfg)
         # Build teacher model
         if isinstance(teacher_config, (str, Path)):
             teacher_config = Config.fromfile(teacher_config)

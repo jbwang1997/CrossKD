@@ -56,7 +56,8 @@ model = dict(
             type='KnowledgeDistillationKLDivLoss',
             class_reduction='sum',
             T=1,
-            loss_weight=4.0),
+            loss_weight=3.0),
+        loss_bbox_kd=dict(type='GIoULoss', loss_weight=2.0),
         reused_teacher_head_idx=3),
     # model training and testing settings
     train_cfg=dict(
