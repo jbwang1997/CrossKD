@@ -2,16 +2,11 @@ _base_ = [
     '../_base_/datasets/coco_detection.py', '../_base_/default_runtime.py'
 ]
 model = dict(
-    type='CrossKDDeformableDETR',
+    type='DeformableDETR',
     num_queries=300,
     num_feature_levels=4,
     with_box_refine=True,
     as_two_stage=True,
-    teacher_config='configs/deformable_detr/deformable-detr-refine-twostage_r50_16xb2-50e_coco.py',
-    teacher_ckpt='https://download.openmmlab.com/mmdetection/v3.0/deformable_detr/deformable-detr-refine-twostage_r50_16xb2-50e_coco/deformable-detr-refine-twostage_r50_16xb2-50e_coco_20221021_184714-acc8a5ff.pth',
-    kd_cfg=dict(
-        loss_cls_kd=dict(type='KDQualityFocalLoss', beta=0, loss_weight=1.0),
-        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0)),
     data_preprocessor=dict(
         type='DetDataPreprocessor',
         mean=[123.675, 116.28, 103.53],
@@ -125,7 +120,7 @@ train_pipeline = [
     dict(type='PackDetInputs')
 ]
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=4,
     dataset=dict(
         filter_cfg=dict(filter_empty_gt=False), pipeline=train_pipeline))
 

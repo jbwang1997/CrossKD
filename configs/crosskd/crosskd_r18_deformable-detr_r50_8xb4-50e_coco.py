@@ -125,7 +125,7 @@ train_pipeline = [
     dict(type='PackDetInputs')
 ]
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=4,
     dataset=dict(
         filter_cfg=dict(filter_empty_gt=False), pipeline=train_pipeline))
 

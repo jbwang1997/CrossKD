@@ -2,7 +2,7 @@ _base_ = [
     '../_base_/datasets/coco_detection.py', '../_base_/default_runtime.py'
 ]
 model = dict(
-    type='CrossKDDeformableDETR',
+    type='CrossKDDeformableDETR2',
     num_queries=300,
     num_feature_levels=4,
     with_box_refine=True,
@@ -125,7 +125,7 @@ train_pipeline = [
     dict(type='PackDetInputs')
 ]
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=4,
     dataset=dict(
         filter_cfg=dict(filter_empty_gt=False), pipeline=train_pipeline))
 
