@@ -73,7 +73,9 @@ model = dict(
             class_reduction='sum',
             T=3,
             loss_weight=0.5),
-        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0)),
+        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0),
+        loss_feat_kd = dict(type='PKDLoss', loss_weight=6),
+        ),
         # loss_reg_kd=dict(type='GIoULoss', loss_weight=3.0)),
     # model training and testing settings
     train_cfg=dict(

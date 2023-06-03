@@ -180,7 +180,14 @@ class CrossKDFasterRCNN(TwoStageDetector):
         roi_losses = self.roi_head_loss_with_kd(
             stu_x, tea_x, rpn_results_list,batch_data_samples)
         losses.update(roi_losses)
-
+        
+        if self.with_feat_distill:
+            losses_feat_kd = [
+                self.loss_feat_kd(feat, tea_feat)
+                for feat, tea_feat in zip(stu_x, tea_x)
+            ]
+        losses.update(losses_feat_kd=losses_feat_kd)
+        
         return losses
     
     def roi_head_loss_with_kd(self,
