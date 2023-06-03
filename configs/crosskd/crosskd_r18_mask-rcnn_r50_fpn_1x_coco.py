@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/coco_detection.py',
+    '../_base_/datasets/coco_instance.py',
     '../_base_/schedules/schedule_1x.py', 
     '../_base_/default_runtime.py'
 ]
@@ -7,8 +7,8 @@ _base_ = [
 # model settings
 model = dict(
     type='CrossKDTwoStageDetector',
-    teacher_config='configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py',
-    teacher_ckpt='https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',
+    teacher_config='configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py',
+    teacher_ckpt='https://download.openmmlab.com/mmdetection/v2.0/mask_rcnn/mask_rcnn_r50_fpn_1x_coco/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth',
     data_preprocessor=dict(
         type='DetDataPreprocessor',
         mean=[123.675, 116.28, 103.53],
@@ -66,15 +66,29 @@ model = dict(
             reg_class_agnostic=False,
             loss_cls=dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-            loss_bbox=dict(type='L1Loss', loss_weight=1.0))),
+            loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+        mask_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        mask_head=dict(
+            type='FCNMaskHead',
+            num_convs=4,
+            in_channels=256,
+            conv_out_channels=256,
+            num_classes=80,
+            loss_mask=dict(
+                type='CrossEntropyLoss', use_mask=True, loss_weight=1.0))),
     kd_cfg=dict(
         loss_cls_kd=dict(
             type='KnowledgeDistillationKLDivLoss',
             class_reduction='sum',
             T=3,
             loss_weight=0.5),
-        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0)),
-        # loss_reg_kd=dict(type='GIoULoss', loss_weight=3.0)),
+        loss_reg_kd=dict(type='L1Loss', loss_weight=1.0),
+        loss_mask_kd=dict(type='KDQualityFocalLoss',
+                          beta=1.0, loss_weight=1.0)),
     # model training and testing settings
     train_cfg=dict(
         rpn=dict(
@@ -113,6 +127,7 @@ model = dict(
                 pos_fraction=0.25,
                 neg_pos_ub=-1,
                 add_gt_as_proposals=True),
+            mask_size=28,
             pos_weight=-1,
             debug=False)),
     test_cfg=dict(

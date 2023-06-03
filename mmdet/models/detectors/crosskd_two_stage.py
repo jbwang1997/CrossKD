@@ -12,15 +12,15 @@ from torch import Tensor
 
 from mmdet.registry import MODELS
 from mmdet.structures import SampleList, DetDataSample
-from mmdet.structures.bbox import cat_boxes, bbox2roi
+from mmdet.structures.bbox import bbox2roi
 from mmdet.utils import (ConfigType, InstanceList, OptConfigType,
-                         OptInstanceList, OptMultiConfig, reduce_mean)
-from ..utils import images_to_levels, multi_apply, unpack_gt_instances
+                         OptMultiConfig)
+from ..utils import unpack_gt_instances
 from .two_stage import TwoStageDetector
 
 
 @MODELS.register_module()
-class CrossKDFasterRCNN(TwoStageDetector):
+class CrossKDTwoStageDetector(TwoStageDetector):
     r"""Implementation of `Distilling the Knowledge in a Neural Network.
     <https://arxiv.org/abs/1503.02531>`_.
 
@@ -76,10 +76,15 @@ class CrossKDFasterRCNN(TwoStageDetector):
         self.freeze(self.teacher)
         self.loss_cls_kd = MODELS.build(kd_cfg['loss_cls_kd'])
         self.loss_reg_kd = MODELS.build(kd_cfg['loss_reg_kd'])
+        if self.roi_head.with_mask:
+            self.loss_mask_kd = MODELS.build(kd_cfg['loss_mask_kd'])
+
         self.with_feat_distill = False
-        if kd_cfg.get('loss_feat_kd', None):
+        if 'loss_feat_kd' in kd_cfg:
             self.loss_feat_kd = MODELS.build(kd_cfg['loss_feat_kd'])
             self.with_feat_distill = True
+
+
         
     @staticmethod
     def freeze(model: nn.Module):
@@ -186,7 +191,7 @@ class CrossKDFasterRCNN(TwoStageDetector):
                 self.loss_feat_kd(feat, tea_feat)
                 for feat, tea_feat in zip(stu_x, tea_x)
             ]
-        losses.update(losses_feat_kd=losses_feat_kd)
+            losses.update(losses_feat_kd=losses_feat_kd)
         
         return losses
     
@@ -235,6 +240,7 @@ class CrossKDFasterRCNN(TwoStageDetector):
                 bbox_results['reused_bbox_feats'],
                 batch_gt_instances)
             losses.update(mask_results['loss_mask'])
+            losses.update(mask_results['loss_mask_kd'])
 
         return losses
     
@@ -359,9 +365,9 @@ class CrossKDFasterRCNN(TwoStageDetector):
                           reused_bbox_feats,
                           batch_gt_instances) -> dict:
         stu_head, tea_head = self.roi_head, self.teacher.roi_head
-        if not self.share_roi_extractor:
+        if not stu_head.share_roi_extractor:
             pos_rois = bbox2roi([res.pos_priors for res in sampling_results])
-            stu_mask_results = self._mask_forward(stu_x, pos_rois)
+            stu_mask_results = stu_head._mask_forward(stu_x, pos_rois)
             tea_mask_results = tea_head._mask_forward(tea_x, pos_rois)
             reused_mask_results = tea_head._mask_forward(stu_x, pos_rois)
         else:
@@ -387,16 +393,26 @@ class CrossKDFasterRCNN(TwoStageDetector):
             reused_mask_results = tea_head._mask_forward(
                 stu_x, pos_inds=pos_inds, bbox_feats=reused_bbox_feats)
 
-        mask_loss_and_target = self.mask_head.loss_and_target(
+        mask_loss_and_target = stu_head.mask_head.loss_and_target(
             mask_preds=stu_mask_results['mask_preds'],
             sampling_results=sampling_results,
             batch_gt_instances=batch_gt_instances,
-            rcnn_train_cfg=self.train_cfg)
+            rcnn_train_cfg=stu_head.train_cfg)
         
+        losses_kd = dict()
+        num_classes = stu_head.bbox_head.num_classes
+        num_rois = stu_bbox_feats.size(0)
         reused_mask_preds = reused_mask_results['mask_preds']
-        reused_mask_preds = 
+        reused_mask_preds = reused_mask_preds.permute(0, 2, 3, 1)
+        reused_mask_preds = reused_mask_preds.reshape(-1, num_classes)
         tea_mask_preds = tea_mask_results['mask_preds']
-        tea_mask_preds
+        tea_mask_preds = tea_mask_preds.permute(0, 2, 3, 1)
+        tea_mask_preds = tea_mask_preds.reshape(-1, num_classes)
+        loss_mask_kd = self.loss_mask_kd(
+            reused_mask_preds,
+            tea_mask_preds,
+            avg_factor=num_rois)
+        losses_kd['loss_mask_kd'] = loss_mask_kd
 
         mask_results = dict()
         for key, value in stu_mask_results.items():
@@ -407,4 +423,5 @@ class CrossKDFasterRCNN(TwoStageDetector):
             mask_results['reused_' + key] = value
 
         mask_results.update(loss_mask=mask_loss_and_target['loss_mask'])
+        mask_results.update(loss_mask_kd=losses_kd)
         return mask_results
