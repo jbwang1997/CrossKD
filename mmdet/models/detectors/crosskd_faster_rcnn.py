@@ -223,7 +223,10 @@ class CrossKDFasterRCNN(TwoStageDetector):
         if roi_head.with_mask:
             mask_results = self.mask_loss_with_kd(
                 stu_x, tea_x, sampling_results, 
-                bbox_results['bbox_feats'], batch_gt_instances)
+                bbox_results['stu_bbox_feats'],
+                bbox_results['tea_bbox_feats'],
+                bbox_results['reused_bbox_feats'],
+                batch_gt_instances)
             losses.update(mask_results['loss_mask'])
 
         return losses
@@ -234,8 +237,6 @@ class CrossKDFasterRCNN(TwoStageDetector):
         stu_head, tea_head = self.roi_head, self.teacher.roi_head
         stu_bbox_results = stu_head._bbox_forward(stu_x, rois)
         tea_bbox_results = tea_head._bbox_forward(tea_x, rois)
-        # reused_x = [self.align_scale(s_x, t_x) for s_x, t_x 
-        #             in zip(stu_x, tea_x)]
         reused_bbox_results = tea_head._bbox_forward(stu_x, rois)
 
         bbox_loss_and_target = stu_head.bbox_head.loss_and_target(
@@ -343,3 +344,60 @@ class CrossKDFasterRCNN(TwoStageDetector):
         bbox_results['loss_bbox'] = bbox_loss_and_target['loss_bbox']
         bbox_results['loss_bbox_kd'] = losses_kd
         return bbox_results
+    
+    def mask_loss_with_kd(self, stu_x, tea_x,
+                          sampling_results,
+                          stu_bbox_feats,
+                          tea_bbox_feats,
+                          reused_bbox_feats,
+                          batch_gt_instances) -> dict:
+        stu_head, tea_head = self.roi_head, self.teacher.roi_head
+        if not self.share_roi_extractor:
+            pos_rois = bbox2roi([res.pos_priors for res in sampling_results])
+            stu_mask_results = self._mask_forward(stu_x, pos_rois)
+            tea_mask_results = tea_head._mask_forward(tea_x, pos_rois)
+            reused_mask_results = tea_head._mask_forward(stu_x, pos_rois)
+        else:
+            pos_inds = []
+            device = stu_bbox_feats.device
+            for res in sampling_results:
+                pos_inds.append(
+                    torch.ones(
+                        res.pos_priors.shape[0],
+                        device=device,
+                        dtype=torch.uint8))
+                pos_inds.append(
+                    torch.zeros(
+                        res.neg_priors.shape[0],
+                        device=device,
+                        dtype=torch.uint8))
+            pos_inds = torch.cat(pos_inds)
+
+            stu_mask_results = stu_head._mask_forward(
+                stu_x, pos_inds=pos_inds, bbox_feats=stu_bbox_feats)
+            tea_mask_results = tea_head._mask_forward(
+                tea_x, pos_inds=pos_inds, bbox_feats=tea_bbox_feats)
+            reused_mask_results = tea_head._mask_forward(
+                stu_x, pos_inds=pos_inds, bbox_feats=reused_bbox_feats)
+
+        mask_loss_and_target = self.mask_head.loss_and_target(
+            mask_preds=stu_mask_results['mask_preds'],
+            sampling_results=sampling_results,
+            batch_gt_instances=batch_gt_instances,
+            rcnn_train_cfg=self.train_cfg)
+        
+        reused_mask_preds = reused_mask_results['mask_preds']
+        reused_mask_preds = 
+        tea_mask_preds = tea_mask_results['mask_preds']
+        tea_mask_preds
+
+        mask_results = dict()
+        for key, value in stu_mask_results.items():
+            mask_results['stu_' + key] = value
+        for key, value in tea_mask_results.items():
+            mask_results['tea_' + key] = value
+        for key, value in reused_mask_results.items():
+            mask_results['reused_' + key] = value
+
+        mask_results.update(loss_mask=mask_loss_and_target['loss_mask'])
+        return mask_results
