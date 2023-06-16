@@ -48,7 +48,7 @@ def kd_quality_focal_loss(pred,
                           reduction='mean',
                           avg_factor=None):
     num_classes = pred.size(1)
-    if weight is not None:
+    if weight is not None and weight.ndim < pred.ndim:
         weight = weight[:, None].repeat(1, num_classes)
 
     target = target.detach().sigmoid()

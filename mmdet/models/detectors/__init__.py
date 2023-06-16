@@ -59,6 +59,7 @@ from .crosskd_single_stage import CrossKDSingleStageDetector
 from .crosskd_retinanet import CrossKDRetinaNet
 from .crosskd_gfl import CrossKDGFL
 from .crosskd_two_stage import CrossKDTwoStageDetector
+from .crosskd_yolo import CrossKDYolov3
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
