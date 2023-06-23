@@ -22,7 +22,7 @@ Knowledge Distillation (KD) has been validated as an effective model compression
 
 ## Get Started
 
-### Prerequisites
+### 1. Prerequisites
 
 **Dependencies**
 
@@ -33,7 +33,7 @@ Knowledge Distillation (KD) has been validated as an effective model compression
 - mmcv==2.0.0rc4
 - mmengine==0.7.3
 
-Our implementation based on MMDetection==3.0.0rc6. For more information about installation, please see the [official instructions](https://pytorch.org/get-started/locally/).
+Our implementation based on MMDetection==3.0.0rc6. For more information about installation, please see the [official instructions](https://mmdetection.readthedocs.io/en/3.x/).
 
 **Step 0.** Create Conda Environment
 
@@ -56,7 +56,7 @@ mim install "mmengine==0.7.3"
 mim install "mmcv==2.0.0rc4"
 ```
 
-**Step 3.** Install [CrossKD](https://github.com/jbwang1997/CrossKD.git)
+**Step 3.** Install [CrossKD](https://github.com/jbwang1997/CrossKD.git).
 
 ```shell
 git clone https://github.com/jbwang1997/CrossKD
@@ -67,7 +67,80 @@ pip install -v -e .
 # thus any local modifications made to the code will take effect without reinstallation.
 ```
 
-**Step 4.** Download Dataset
+**Step 4.** Prepare dataset follow the [official instructions](https://mmdetection.readthedocs.io/en/3.x/user_guides/dataset_prepare.html).
+
+
+
+### 2. Train
+
+**Single GPU**
+
+```shell
+python tools/train.py \
+    configs/crosskd/${CONFIG_FILE} \
+    [optional arguments]
+```
+
+**Multi GPU**
+
+```shell
+CUDA_VISIBLE_DEVICES=x,x,x,x python tools/dist_train.sh \
+                                 configs/crosskd/${CONFIG_FILE} ${GPU_NUM}\
+                                 [optional arguments]
+```
+
+### 3. Test
+
+```shell
+python tools/test.py \
+    configs/crosskd/${CONFIG_FILE} \
+    ${CHECKPOINT_FILE} \
+    [--out ${RESULT_FILE}] \
+    [--show]
+```
+
+## Results
+
+### 1. GFL
+
+| **Method**         | schedule | mAP         | Config                                                                           | Download                                                                                                                                             |
+|:------------------:|:--------:|:-----------:|:--------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------:|
+| **GFL-Res101 (T)** | 2x+ms    | 44.9        |  [config](<configs/gfl/gfl_r101_fpn_ms-2x_coco.py>)                              |  [model](https://download.openmmlab.com/mmdetection/v2.0/gfl/gfl_r101_fpn_mstrain_2x_coco/gfl_r101_fpn_mstrain_2x_coco_20200629_200126-dd12f847.pth) |
+| **GFL-Res50 (S)**  | 1x       | 40.2        |  [config](<configs/gfl/gfl_r50_fpn_1x_coco.py>)                                  |  [model](https://download.openmmlab.com/mmdetection/v2.0/gfl/gfl_r50_fpn_1x_coco/gfl_r50_fpn_1x_coco_20200629_121244-25944287.pth)                   |
+| **CrossKD**        | 1x       | 43.7 (+3.5) |  [config](<configs/crosskd/crosskd_r50_gflv1_r101-2x-ms_fpn_1x_coco.py>)         |  [model](https://drive.google.com/file/d/1S7fyDkFSAauJry0ZGS-ZW-P3CJb7RlsO/view?usp=drive_link)                                                      |
+| **CrossKD+PKD**    | 1x       | 43.9 (+3.7) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_gflv1_r101-2x-ms_fpn_1x_coco.py>) |  [model](https://drive.google.com/file/d/1LJZ27al2omdXb3cUty-RX37pMLp8L-4B/view?usp=drive_link)                                                      |
+
+
+
+### 2. RetinaNet
+
+| **Method**               | schedule | mAP         | Config                                                                         | Download                                                                                                                                        |
+|:------------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------:|
+| **RetineNet-Res101 (T)** | 2x       | 38.9        |  [config](<configs/retinanet/retinanet_r101_fpn_2x_coco.py>)                   |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r101_fpn_2x_coco/retinanet_r101_fpn_2x_coco_20200131-5560aee8.pth) |
+| **RetineNet-Res50 (S)**  | 2x       | 37.4        |  [config](<configs/retinanet/retinanet_r50_fpn_2x_coco.py>)                    |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_2x_coco/retinanet_r50_fpn_2x_coco_20200131-fdb43119.pth)   |
+| **CrossKD**              | 2x       | 39.5 (+2.1) |  [config](<configs/crosskd/crosskd_r50_retinanet_r101_fpn_2x_coco.py>)         |  [model](https://drive.google.com/file/d/1fjwtuoKd4a_b5CHf6X0tKDmSNlwzYfWb/view?usp=drive_link)                                                 |
+| **CrossKD+PKD**          | 2x       | 39.7 (+2.3) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_retinanet_r101_fpn_2x_coco.py>) |  [model](https://drive.google.com/file/d/1Ha9r5DrzaZ_9tz8x9PVxOkGaKAApIBGd/view?usp=drive_link)                                                 |
+
+
+### 3. FCOS
+
+| **Method**          | schedule | mAP         | Config                                                                                           | Download                                                                                                                                                                            |
+|:-------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| **FCOS-Res101 (T)** | 2x+ms    | 40.8        |  [config](<configs/fcos/fcos_r101-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                      |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco-511424d6.pth) |
+| **FCOS-Res50 (T)**  | 2x+ms    | 38.5        |  [config](<configs/fcos/fcos_r50-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                       |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco-d92ceeea.pth)   |
+| **CrossKD**         | 2x+ms    | 41.1 (+2.6) |  [config](<configs/crosskd/crosskd_r50_fcos_r101-2x-ms_caffe_fpn_gn-head_2x_ms_coco.py>)         |  [model](https://drive.google.com/file/d/1ll5vOGFMEfOsNCkgbPuqh0uMNFnfICbE/view?usp=drive_link)                                                                                     |
+| **CrossKD+PKD**     | 2x+ms    | 41.3 (+2.8) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_fcos_r101-2x-ms_caffe_fpn_gn-head_2x_ms_coco.py>) |  [model](https://drive.google.com/file/d/1r-UzxAOYOfPJFIV5e7Rd3P3uC9gXP09v/view?usp=drive_link)                                                                                     |
+
+
+### 4. ATSS
+
+| **Method**          | schedule | mAP        | Config                                                                    | Download                                                                                                                       |
+|:-------------------:|:--------:|:----------:|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
+| **ATSS-Res101 (T)** | 1x       | 41.5       |  [config](<configs/atss/atss_r101_fpn_1x_coco.py>)                        |  [model](https://download.openmmlab.com/mmdetection/v2.0/atss/atss_r101_fpn_1x_coco/atss_r101_fpn_1x_20200825-dfcadd6f.pth)    |
+| **ATSS-Res50 (S)**  | 1x       | 39.4       |  [config](<configs/atss/atss_r50_fpn_1x_coco.py>)                         |  [model](https://download.openmmlab.com/mmdetection/v2.0/atss/atss_r50_fpn_1x_coco/atss_r50_fpn_1x_coco_20200209-985f7bd0.pth) |
+| **CrossKD**         | 1x       | 41.8(+2.4) |  [config](<configs/crosskd/crosskd_r50_atss_r101_fpn_1x_coco.py>)         |  [model](https://drive.google.com/file/d/1qyxOMaxQrwJ20tEgIwU8pi31O8A1hsEG/view?usp=drive_link)                                |
+| **CrossKD+PKD**     | 1x       | 41.8(+2.4) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_atss_r101_fpn_1x_coco.py>) |  [model](https://drive.google.com/file/d/1LkuKau1Na843ZPSNz77DqV8v8111b2_y/view?usp=drive_link)                                |
+
 
 ## Citation
 
@@ -97,4 +170,4 @@ For commercial licensing, please contact `cmm[AT]nankai.edu.cn` and `andrewhoux[
 
 ## Acknowledgement
 
-This repo is based on mmDetection.
+This repo is based on MMDetection.
