@@ -4,7 +4,7 @@
 
 This repository contains the official implementation of the following paper:
 
-> **CrossKD: Cross-Head Knowledge Distillation for Dense Object Detection**`<br>`
+> **CrossKD: Cross-Head Knowledge Distillation for Dense Object Detection**<br>
 > [Jiabao Wang](https://scholar.google.co.uk/citations?hl=en&user=S9ErhhEAAAAJ)<sup>\*</sup>, [Yuming Chen](https://github.com/FishAndWasabi/)<sup>\*</sup>, [Zhaohui Zheng](https://scholar.google.co.uk/citations?hl=en&user=0X71NDYAAAAJ)，[Xiang Li](http://implus.github.io/), [Ming-Ming Cheng](https://mmcheng.net/cmm), [Qibin Hou](https://houqb.github.io/)<sup>\*</sup>  <br>
 > (\* denotes equal contribution) <br>
 > VCIP, School of Computer Science, Nankai University <br>
