@@ -1,4 +1,4 @@
-# `<p align=center>`  🌟 `CrossKD: Cross-Head Knowledge Distillation for Dense Object Detection` 🌟 `</p>`
+# <p align=center>  🌟 `CrossKD: Cross-Head Knowledge Distillation for Dense Object Detection` 🌟 </p>
 
 ![Python 3.8](https://img.shields.io/badge/python-3.8-g) ![pytorch 1.12.1](https://img.shields.io/badge/pytorch-1.12.0-blue.svg)
 
@@ -103,7 +103,7 @@ python tools/test.py \
 
 ### 1. GFL
 
-| **Method**         | schedule | mAP         | Config                                                                           | Download                                                                                                                                             |
+| **Method**         | schedule | AP          | Config                                                                           | Download                                                                                                                                             |
 |:------------------:|:--------:|:-----------:|:--------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------:|
 | **GFL-Res101 (T)** | 2x+ms    | 44.9        |  [config](<configs/gfl/gfl_r101_fpn_ms-2x_coco.py>)                              |  [model](https://download.openmmlab.com/mmdetection/v2.0/gfl/gfl_r101_fpn_mstrain_2x_coco/gfl_r101_fpn_mstrain_2x_coco_20200629_200126-dd12f847.pth) |
 | **GFL-Res50 (S)**  | 1x       | 40.2        |  [config](<configs/gfl/gfl_r50_fpn_1x_coco.py>)                                  |  [model](https://download.openmmlab.com/mmdetection/v2.0/gfl/gfl_r50_fpn_1x_coco/gfl_r50_fpn_1x_coco_20200629_121244-25944287.pth)                   |
@@ -114,7 +114,7 @@ python tools/test.py \
 
 ### 2. RetinaNet
 
-| **Method**               | schedule | mAP         | Config                                                                         | Download                                                                                                                                        |
+| **Method**               | schedule | AP          | Config                                                                         | Download                                                                                                                                        |
 |:------------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------:|
 | **RetineNet-Res101 (T)** | 2x       | 38.9        |  [config](<configs/retinanet/retinanet_r101_fpn_2x_coco.py>)                   |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r101_fpn_2x_coco/retinanet_r101_fpn_2x_coco_20200131-5560aee8.pth) |
 | **RetineNet-Res50 (S)**  | 2x       | 37.4        |  [config](<configs/retinanet/retinanet_r50_fpn_2x_coco.py>)                    |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_2x_coco/retinanet_r50_fpn_2x_coco_20200131-fdb43119.pth)   |
@@ -124,7 +124,7 @@ python tools/test.py \
 
 ### 3. FCOS
 
-| **Method**          | schedule | mAP         | Config                                                                                           | Download                                                                                                                                                                            |
+| **Method**          | schedule | AP          | Config                                                                                           | Download                                                                                                                                                                            |
 |:-------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 | **FCOS-Res101 (T)** | 2x+ms    | 40.8        |  [config](<configs/fcos/fcos_r101-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                      |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco-511424d6.pth) |
 | **FCOS-Res50 (T)**  | 2x+ms    | 38.5        |  [config](<configs/fcos/fcos_r50-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                       |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco-d92ceeea.pth)   |
@@ -134,7 +134,7 @@ python tools/test.py \
 
 ### 4. ATSS
 
-| **Method**          | schedule | mAP        | Config                                                                    | Download                                                                                                                       |
+| **Method**          | schedule | AP         | Config                                                                    | Download                                                                                                                       |
 |:-------------------:|:--------:|:----------:|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
 | **ATSS-Res101 (T)** | 1x       | 41.5       |  [config](<configs/atss/atss_r101_fpn_1x_coco.py>)                        |  [model](https://download.openmmlab.com/mmdetection/v2.0/atss/atss_r101_fpn_1x_coco/atss_r101_fpn_1x_20200825-dfcadd6f.pth)    |
 | **ATSS-Res50 (S)**  | 1x       | 39.4       |  [config](<configs/atss/atss_r50_fpn_1x_coco.py>)                         |  [model](https://download.openmmlab.com/mmdetection/v2.0/atss/atss_r50_fpn_1x_coco/atss_r50_fpn_1x_coco_20200209-985f7bd0.pth) |
