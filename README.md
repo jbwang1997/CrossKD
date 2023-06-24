@@ -112,14 +112,15 @@ python tools/test.py \
 
 
 
+
 ### 2. RetinaNet
 
 | **Method**               | schedule | AP          | Config                                                                         | Download                                                                                                                                        |
 |:------------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------:|
 | **RetineNet-Res101 (T)** | 2x       | 38.9        |  [config](<configs/retinanet/retinanet_r101_fpn_2x_coco.py>)                   |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r101_fpn_2x_coco/retinanet_r101_fpn_2x_coco_20200131-5560aee8.pth) |
 | **RetineNet-Res50 (S)**  | 2x       | 37.4        |  [config](<configs/retinanet/retinanet_r50_fpn_2x_coco.py>)                    |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_2x_coco/retinanet_r50_fpn_2x_coco_20200131-fdb43119.pth)   |
-| **CrossKD**              | 2x       | 39.5 (+2.1) |  [config](<configs/crosskd/crosskd_r50_retinanet_r101_fpn_2x_coco.py>)         |  [model](https://drive.google.com/file/d/1fjwtuoKd4a_b5CHf6X0tKDmSNlwzYfWb/view?usp=drive_link)                                                 |
-| **CrossKD+PKD**          | 2x       | 39.7 (+2.3) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_retinanet_r101_fpn_2x_coco.py>) |  [model](https://drive.google.com/file/d/1Ha9r5DrzaZ_9tz8x9PVxOkGaKAApIBGd/view?usp=drive_link)                                                 |
+| **CrossKD**              | 2x       | 39.7 (+2.3) |  [config](<configs/crosskd/crosskd_r50_retinanet_r101_fpn_2x_coco.py>)         |  [model](https://drive.google.com/file/d/13XtsOmFGqcJZIUcVaqpW9N-_WVSM6PlA/view?usp=drive_link)                                                 |
+| **CrossKD+PKD**          | 2x       | 39.8 (+2.4) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_retinanet_r101_fpn_2x_coco.py>) |  [model](https://drive.google.com/file/d/1V1QPEvcmIZdQHFqiZLbQ51CHJm1i1fPZ/view?usp=drive_link)                                                 |
 
 
 ### 3. FCOS
