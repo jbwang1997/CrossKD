@@ -11,8 +11,6 @@ This repository contains the official implementation of the following paper:
 > In ICCV 2023 (under review) <br>
 
 [[Arxiv Paper](https://arxiv.org/abs/2306.11369)]
-[中文版 (TBD)]
-[Website Page (TBD)]
 
 ## Introduction
 
@@ -71,32 +69,25 @@ pip install -v -e .
 
 
 
-### 2. Train
+### 2. Training
 
 **Single GPU**
 
 ```shell
-python tools/train.py \
-    configs/crosskd/${CONFIG_FILE} \
-    [optional arguments]
+python tools/train.py configs/crosskd/${CONFIG_FILE} [optional arguments]
 ```
 
 **Multi GPU**
 
 ```shell
 CUDA_VISIBLE_DEVICES=x,x,x,x python tools/dist_train.sh \
-                                 configs/crosskd/${CONFIG_FILE} ${GPU_NUM}\
-                                 [optional arguments]
+    configs/crosskd/${CONFIG_FILE} ${GPU_NUM} [optional arguments]
 ```
 
-### 3. Test
+### 3. Evaluation
 
 ```shell
-python tools/test.py \
-    configs/crosskd/${CONFIG_FILE} \
-    ${CHECKPOINT_FILE} \
-    [--out ${RESULT_FILE}] \
-    [--show]
+python tools/test.py configs/crosskd/${CONFIG_FILE} ${CHECKPOINT_FILE}
 ```
 
 ## Results
@@ -128,7 +119,7 @@ python tools/test.py \
 | **Method**          | schedule | AP          | Config                                                                                           | Download                                                                                                                                                                            |
 |:-------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 | **FCOS-Res101 (T)** | 2x+ms    | 40.8        |  [config](<configs/fcos/fcos_r101-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                      |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r101_caffe_fpn_gn-head_mstrain_640-800_2x_coco-511424d6.pth) |
-| **FCOS-Res50 (T)**  | 2x+ms    | 38.5        |  [config](<configs/fcos/fcos_r50-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                       |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco-d92ceeea.pth)   |
+| **FCOS-Res50 (S)**  | 2x+ms    | 38.5        |  [config](<configs/fcos/fcos_r50-caffe_fpn_gn-head_ms-640-800-2x_coco.py>)                       |  [model](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco/fcos_r50_caffe_fpn_gn-head_mstrain_640-800_2x_coco-d92ceeea.pth)   |
 | **CrossKD**         | 2x+ms    | 41.1 (+2.6) |  [config](<configs/crosskd/crosskd_r50_fcos_r101-2x-ms_caffe_fpn_gn-head_2x_ms_coco.py>)         |  [model](https://drive.google.com/file/d/1ll5vOGFMEfOsNCkgbPuqh0uMNFnfICbE/view?usp=drive_link)                                                                                     |
 | **CrossKD+PKD**     | 2x+ms    | 41.3 (+2.8) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_fcos_r101-2x-ms_caffe_fpn_gn-head_2x_ms_coco.py>) |  [model](https://drive.google.com/file/d/1r-UzxAOYOfPJFIV5e7Rd3P3uC9gXP09v/view?usp=drive_link)                                                                                     |
 
@@ -150,7 +141,8 @@ If you find our repo useful for your research, please cite us:
 ```
 @misc{wang2023crosskd,
       title={CrossKD: Cross-Head Knowledge Distillation for Dense Object Detection}, 
-      author={Jiabao Wang and Yuming Chen and Zhaohui Zheng and Xiang Li and Ming-Ming Cheng and Qibin Hou},
+      author={Jiabao Wang and Yuming Chen and Zhaohui Zheng and Xiang Li and 
+              Ming-Ming Cheng and Qibin Hou},
       year={2023},
       eprint={2306.11369},
       archivePrefix={arXiv},
@@ -158,17 +150,29 @@ If you find our repo useful for your research, please cite us:
 }
 ```
 
+This project is based on the open source codebase [MMDetection](https://github.com/open-mmlab/mmdetection).
+```
+@article{mmdetection,
+  title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
+  author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
+             Xiong, Yu and Li, Xiaoxiao and Sun, Shuyang and Feng, Wansen and
+             Liu, Ziwei and Xu, Jiarui and Zhang, Zheng and Cheng, Dazhi and
+             Zhu, Chenchen and Cheng, Tianheng and Zhao, Qijie and Li, Buyu and
+             Lu, Xin and Zhu, Rui and Wu, Yue and Dai, Jifeng and Wang, Jingdong
+             and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
+  journal= {arXiv preprint arXiv:1906.07155},
+  year={2019}
+}
+```
+
 ## License
 
-Licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) for Non-commercial use only.
-Any commercial use should get formal permission first.
+Licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) for Non-commercial use only. Any commercial use should get formal permission first.
 
 ## Contact
 
-For technical questions, please contact `jiabaowang[AT]mail.nankai.edu.cn` and `chenyuming[AT]mail.nankai.edu.cn`.
-
-For commercial licensing, please contact `cmm[AT]nankai.edu.cn` and `andrewhoux[AT]gmail.com`
+For technical questions, please contact `jbwang@mail.nankai.edu.cn` and `chenyuming@mail.nankai.edu.cn`.
 
 ## Acknowledgement
 
-This repo is based on MMDetection.
+This repo is modified from open source object detection codebase [MMDetection](https://github.com/open-mmlab/mmdetection).
