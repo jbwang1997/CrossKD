@@ -61,7 +61,7 @@ from .crosskd_gfl import CrossKDGFL
 from .crosskd_faster_rcnn import CrossKDFasterRCNN
 from .crosskd_deformable_detr import CrossKDDeformableDETR
 from .crosskd_deformable_detr2 import CrossKDDeformableDETR2
-
+from .crosskd_deformable_detr2giou import CrossKDDeformableDETR2GIOU
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
     'KnowledgeDistillationSingleStageDetector', 'FastRCNN', 'FasterRCNN',
