@@ -3,7 +3,7 @@ _base_ = [
     '../_base_/schedules/schedule_1x.py', 
     '../_base_/default_runtime.py'
 ]
-teacher_ckpt = 'work_dirs/retinanet_swin-t-p4-w7_fpn_1x_coco/epoch_12.pth'
+teacher_ckpt = 'retinanet_swin-t-p4-w7_fpn_1x_coco.pth'
 model = dict(
     type='CrossKDRetinaNet',
     data_preprocessor=dict(
@@ -12,7 +12,7 @@ model = dict(
         std=[58.395, 57.12, 57.375],
         bgr_to_rgb=True,
         pad_size_divisor=32),
-    teacher_config='configs/swin/retinanet_swin-t-p4-w7_fpn_1x_coco.py',
+    teacher_config='configs/retinanet/retinanet_swin-t-p4-w7_fpn_1x_coco.py',
     teacher_ckpt=teacher_ckpt,
     backbone=dict(
         type='ResNet',
