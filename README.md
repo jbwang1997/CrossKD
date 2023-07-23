@@ -109,8 +109,8 @@ python tools/test.py configs/crosskd/${CONFIG_FILE} ${CHECKPOINT_FILE}
 |:------------------------:|:--------:|:-----------:|:------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------:|
 | **RetineNet-Res101 (T)** | 2x       | 38.9        |  [config](<configs/retinanet/retinanet_r101_fpn_2x_coco.py>)                   |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r101_fpn_2x_coco/retinanet_r101_fpn_2x_coco_20200131-5560aee8.pth) |
 | **RetineNet-Res50 (S)**  | 2x       | 37.4        |  [config](<configs/retinanet/retinanet_r50_fpn_2x_coco.py>)                    |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_2x_coco/retinanet_r50_fpn_2x_coco_20200131-fdb43119.pth)   |
-| **CrossKD**              | 2x       | 39.7 (+2.3) |  [config](<configs/crosskd/crosskd_r50_retinanet_r101_fpn_2x_coco.py>)         |  [model](https://drive.google.com/file/d/13XtsOmFGqcJZIUcVaqpW9N-_WVSM6PlA/view?usp=drive_link)                                                 |
-| **CrossKD+PKD**          | 2x       | 39.8 (+2.4) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_retinanet_r101_fpn_2x_coco.py>) |  [model](https://drive.google.com/file/d/1V1QPEvcmIZdQHFqiZLbQ51CHJm1i1fPZ/view?usp=drive_link)                                                 |
+| **CrossKD**              | 2x       | 39.7 (+2.3) |  [config](<configs/crosskd/crosskd_r50_retinanet_r101_fpn_2x_coco.py>)         |  [model](https://drive.google.com/file/d/1fjwtuoKd4a_b5CHf6X0tKDmSNlwzYfWb/view?usp=drive_link)                                                 |
+| **CrossKD+PKD**          | 2x       | 39.8 (+2.4) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_retinanet_r101_fpn_2x_coco.py>) |  [model](https://drive.google.com/file/d/1Ha9r5DrzaZ_9tz8x9PVxOkGaKAApIBGd/view?usp=drive_link)                                                 |
 
 
 ### 3. FCOS
@@ -131,6 +131,19 @@ python tools/test.py configs/crosskd/${CONFIG_FILE} ${CHECKPOINT_FILE}
 | **ATSS-Res50 (S)**  | 1x       | 39.4       |  [config](<configs/atss/atss_r50_fpn_1x_coco.py>)                         |  [model](https://download.openmmlab.com/mmdetection/v2.0/atss/atss_r50_fpn_1x_coco/atss_r50_fpn_1x_coco_20200209-985f7bd0.pth) |
 | **CrossKD**         | 1x       | 41.8(+2.4) |  [config](<configs/crosskd/crosskd_r50_atss_r101_fpn_1x_coco.py>)         |  [model](https://drive.google.com/file/d/1qyxOMaxQrwJ20tEgIwU8pi31O8A1hsEG/view?usp=drive_link)                                |
 | **CrossKD+PKD**     | 1x       | 41.8(+2.4) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_atss_r101_fpn_1x_coco.py>) |  [model](https://drive.google.com/file/d/1LkuKau1Na843ZPSNz77DqV8v8111b2_y/view?usp=drive_link)                                |
+
+
+
+## Heterogeneous Results
+
+### 1. Swin-Tiny
+
+| **Method**          | schedule | AP         | Config                                                                    | Download                                                                                                                       |
+|:-------------------:|:--------:|:----------:|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
+| **RetinaNet-SwinT (T)** | 1x       | 37.3       |  [config](<configs/retinanet/retinanet_swin-t-p4-w7_fpn_1x_coco.py>)                        |  [model](https://drive.google.com/file/d/1W2KGR77XfQ5SRomgIyxCjqUNGJichcgh/view?usp=drive_link)    |
+| **RetinaNet-Res50 (S)**  | 1x       | 36.5       |  [config](<configs/atss/atss_r50_fpn_1x_coco.py>)                         |  [model](https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth) |
+| **CrossKD**     | 1x       | 38.0 (+1.5) |  [config](<configs/crosskd+pkd/crosskd+pkd_r50_atss_r101_fpn_1x_coco.py>) |  [model](https://drive.google.com/file/d/17rbkcXgqKfVUweRgzK7NtqFcLC-PohKX/view?usp=drive_link)                                |
+
 
 
 ## Citation
